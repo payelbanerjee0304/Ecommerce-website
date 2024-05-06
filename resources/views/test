@@ -1,0 +1,147 @@
+else if (!upiRegex.test(rdm)) {
+              $('#errorMessage').hide();
+              $('#upiIdError').show();
+              return false;
+}
+            
+
+<script>    
+    $(document).ready(function () {
+      $('.text-danger').remove();
+            // Event listener for Unique Code input field
+            $('#uniquecode').on('input', function() {
+                if ($(this).val().trim() !== '') {
+                    $('#uniquecode_error').text(''); // Clear Laravel validation error message
+                }
+            });
+
+            // Event listener for Name input field
+            $('#name').on('input', function() {
+                if ($(this).val().trim() !== '') {
+                    $('#name_error').text(''); // Clear Laravel validation error message
+                }
+            });
+
+            // Event listener for Phone input field
+            $('#phone').on('input', function() {
+                if ($(this).val().trim() !== '') {
+                    $('#phone_error').text(''); // Clear Laravel validation error message
+                }
+            });
+            $('#checkbox').on('input', function() {
+                if ($(this).val().trim() !== '') {
+                    $('#checkbox_error').text(''); // Clear Laravel validation error message
+                }
+            });
+            // Add event listener to the terms and conditions checkbox
+        $('#terms_and_conditions').on('change', function() {
+            if ($(this).prop('checked')) {
+                $(this).removeClass('checkbox-error'); // Remove red border CSS class
+            }
+        });
+        $('#myForm').submit(function (e) {
+            e.preventDefault();
+            // Clear existing error messages
+            // Clear existing error messages
+            $('.text-danger').remove();
+        // Check if terms and conditions checkbox is not checked
+        if (!$('#terms_and_conditions').prop('checked')) {
+            $('#terms_and_conditions').addClass('checkbox-error'); // Add CSS class to apply blinking effect or red border
+        } else {
+            $('#terms_and_conditions').removeClass('checkbox-error'); // Remove CSS class if checkbox is checked
+        }
+            $.ajax({
+                "_token": "{{ csrf_token() }}",
+                type: 'POST',
+                url: '{{url('/submit')}}',
+                data: $(this).serialize(),
+                success: function (response) {
+                    // if (response.status == 'error' && response.message == 'Phone number already exists') {
+                        
+                    //     // console.log("error");
+                    //     $('#phone_error').text(response.message).addClass('error-text');
+                        
+                    // }
+                    if (response.status == 'error' && response.message == 'Code is unavailable') {
+                        
+                        // console.log("error");
+                        $('#uniquecode_error').text(response.message).addClass('error-text');
+                        
+                    }
+                    else if (response.status == 'error' && response.message == 'Code has been already taken') {
+                        
+                        // console.log("error not open");
+                        $('#uniquecode_error').text(response.message).addClass('error-text');
+                        
+                    }
+                    else if(response.status == 'success' && response.message == 'Form submitted successfully'){
+                      
+                      // Hide all error messages within the form
+                      $('#myForm .error').text('').hide();
+                        // $('#success-message').html(response.message).show();
+                        // // Clear form fields
+                        // $('#myForm input[type="text"], #myForm input[type="email"], #myForm input[type="number"], #myForm select').val('');
+                        // // Scroll to the top of the page
+                        // window.scrollTo({ top: 0, behavior: 'smooth' });
+                        // $('#terms_and_conditions').prop('checked', false);
+                        // Hide all error messages within the form
+                        Swal.fire({
+                                icon: 'success',
+                                title: 'Success',
+                                text: response.message,
+                                customClass: {
+                                    popup: 'my-swal-popup',
+                                    icon: 'my-swal-icon',
+                                    title: 'my-swal-title',
+                                    content: 'my-swal-content',
+                                    text: 'my-swal-content',
+                                    confirmButton: 'my-swal-confirm-button'
+                                }
+                            }).then((result) => {
+                            if (result.isConfirmed) {
+                                // Redirect to dashboard
+                                window.location.href = '{{ url('/cashback') }}';
+                            }
+                        });
+                    }
+                    else if(response.status == 'success' && response.message == 'Existing Customer...Your details submitted successfully'){
+
+                      Swal.fire({
+                                icon: 'success',
+                                title: 'Success',
+                                text: response.message,
+                                customClass: {
+                                    popup: 'my-swal-popup',
+                                    icon: 'my-swal-icon',
+                                    title: 'my-swal-title',
+                                    content: 'my-swal-content',
+                                    text: 'my-swal-content',
+                                    confirmButton: 'my-swal-confirm-button'
+                                }
+                            }).then((result) => {
+                            if (result.isConfirmed) {
+                                // Redirect to dashboard
+                                window.location.href = '{{ url('/cashback') }}';
+                            }
+                      });
+                        // // Hide all error messages within the form
+                        // $('#myForm .error').text('').hide();
+                        // $('#success-message').html(response.message).show();
+                        // // Clear form fields
+                        // $('#myForm input[type="text"], #myForm input[type="email"], #myForm input[type="number"], #myForm select').val('');
+                        // // Scroll to the top of the page
+                        // window.scrollTo({ top: 0, behavior: 'smooth' });
+                        // $('#terms_and_conditions').prop('checked', false);
+                    }
+                    
+                },
+                error: function (error) {
+                // Handle error response and display validation errors
+                $.each(error.responseJSON.errors, function (field, messages) {
+                    $('#' + field + '_error').text(messages[0]).css('color', 'red'); // Display Laravel validation error message
+                });
+            }
+            });
+        });
+    });
+</script>
